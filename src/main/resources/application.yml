@@ -1,0 +1,4 @@
+github:
+  api:
+    path:
+      get-all-user-repos: https://api.github.com/users/%s/repos
