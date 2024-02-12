@@ -10,11 +10,13 @@ import pl.przemek.gitbrancher.dto.GithubApiRepoDTO;
 import pl.przemek.gitbrancher.dto.OutputBranchDTO;
 import pl.przemek.gitbrancher.dto.OutputRepoDTO;
 import pl.przemek.gitbrancher.dto.OwnerDTO;
+import pl.przemek.gitbrancher.exception.GithubApiException;
 import pl.przemek.gitbrancher.service.github.api.GithubApiClient;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,13 +48,25 @@ public class GithubWrapperServiceTest {
         when(githubApiClient.fetchAllUserReposInfoWithoutForks(username)).thenReturn(githubApiRepoDTOList);
         when(githubApiClient.fetchAllRepoBranchesMappedToOutputBranchDTOs(repoDTO1)).thenReturn(outputBranchDTOList);
         // When
-        List<OutputRepoDTO> result = githubWrapperService.getAllUserReposWithoutForks("username");
+        List<OutputRepoDTO> result = githubWrapperService.getAllUserReposWithoutForks(username);
         // Then
         assertEquals(githubApiRepoDTOList.size(), result.size());
         assertEquals(repoDTO1.name(), result.getFirst().repositoryName());
         assertEquals(repoDTO1.ownerDTO().login(), result.getFirst().ownerLogin());
         OutputRepoDTO first = result.getFirst();
         assertEquals(branchDTO1, first.branches().getFirst());
+    }
 
+    @Test
+    void shouldThrowExceptionWhenGithubApiThrowsException() throws Exception {
+        // Should
+        GithubApiException userNotFoundException = new GithubApiException(404, "Not found");
+        when(githubApiClient.fetchAllUserReposInfoWithoutForks(username)).thenThrow(userNotFoundException);
+        // When
+        GithubApiException exception = assertThrows(GithubApiException.class, () ->
+                githubWrapperService.getAllUserReposWithoutForks(username)
+        );
+        // Then
+        assertEquals(userNotFoundException, exception);
     }
 }
