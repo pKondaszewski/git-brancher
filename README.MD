@@ -6,18 +6,15 @@ Recruitment task for Atipera.
 - Spring Boot 3
 - Gradle
 - Docker (Buildpacks)
-- Git
-- Github (Github Actions)
-- JUnit
-- Mockito
-- Swagger (REST API)
+- Git, Github (Github Actions)
+- JUnit, Mockito, WireMock
 
 
 ## How to run ▶️▶️
 ### Intellij way 🟥🟦
 Run main class `java/pl/przemek/gitbrancher/GitbrancherApplication.java`
 
-### Docker way 🐬🐬
+### Docker way 🐋🐋
 Run `./gradlew bootBuildImage` command
 
 Run `docker run -d -p 8080:8080 --name gitbrancher gitbrancher:0.0.1-SNAPSHOT` command
