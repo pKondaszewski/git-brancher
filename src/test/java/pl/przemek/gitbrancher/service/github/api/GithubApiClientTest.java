@@ -1,113 +1,105 @@
 package pl.przemek.gitbrancher.service.github.api;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import pl.przemek.gitbrancher.config.GitBrancherConfig;
+import pl.przemek.gitbrancher.dto.BranchDTO;
+import pl.przemek.gitbrancher.dto.CommitDTO;
 import pl.przemek.gitbrancher.dto.GithubApiRepoDTO;
-import pl.przemek.gitbrancher.dto.OutputBranchDTO;
 import pl.przemek.gitbrancher.dto.OwnerDTO;
+import pl.przemek.gitbrancher.dto.out.OutputBranchDTO;
 import pl.przemek.gitbrancher.exception.GithubApiException;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@ExtendWith(MockitoExtension.class)
+@RestClientTest(GithubApiClient.class)
+@Import(GitBrancherConfig.class)
 public class GithubApiClientTest {
-    @Mock
-    private HttpClient httpClient;
-    @Mock
-    private HttpResponse<String> httpResponse;
-    @InjectMocks
+    @Value("${github.api.path.base}")
+    private String baseGithubApiUrl;
+    @Value("${github.api.path.routes.get-all-user-repos}")
+    private String listRepositoriesForUserRoute;
+    @Autowired
+    private MockRestServiceServer mockServer;
+    @Autowired
     private GithubApiClient githubApiClient;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    private static String sampleGetAllRepoInfoJsonResponse;
-    private static String sampleGetAllBranchesInfoJsonResponse;
-    private static String sampleApiErrorJsonResponse;
-    private static GithubApiRepoDTO sampleGetAllRepoInfoDTOResponse;
-    private static OutputBranchDTO sampleGetAllBranchesInfoDTOResponse;
+    @Test
+    public void shouldFetchAllUserReposInfoWithoutForksWhenApiReturnsSuccess() throws GithubApiException, JsonProcessingException {
+        // given
+        String username = "username";
+        OwnerDTO ownerDTO = new OwnerDTO(username);
+        GithubApiRepoDTO[] mockRepos = {
+                new GithubApiRepoDTO("repo1", ownerDTO, null, false),
+                new GithubApiRepoDTO("repo2", ownerDTO, null, true),
+                new GithubApiRepoDTO("repo3", ownerDTO, null, true)
+        };
+        String expectedUrl = baseGithubApiUrl + listRepositoriesForUserRoute.formatted(username);
+        mockServer.expect(requestTo(expectedUrl))
+                .andRespond(withSuccess(objectMapper.writeValueAsBytes(mockRepos), MediaType.APPLICATION_JSON));
 
-    @BeforeAll
-    static void initVars() {
-        sampleGetAllRepoInfoJsonResponse =
-                "[{\"name\":\"usernameRepo1\",\"owner\":{\"login\":\"username\"},\"branches_url\":\"https://test.test/repos/username/usernameRepo1/branches{/branch}\",\"fork\":false}," +
-                "{\"name\":\"usernameRepo2\",\"owner\":{\"login\":\"username\"},\"branches_url\":\"https://test.test/repos/username/usernameRepo2/branches{/branch}\",\"fork\":true}," +
-                "{\"name\":\"usernameRepo3\",\"owner\":{\"login\":\"username\"},\"branches_url\":\"https://test.test/repos/username/usernameRepo3/branches{/branch}\",\"fork\":false}]";
-        sampleGetAllBranchesInfoJsonResponse =
-                "[{\"name\":\"main\",\"commit\":{\"sha\":\"123\"}}," +
-                "{\"name\":\"develop\",\"commit\":{\"sha\":\"456\"}}," +
-                "{\"name\":\"feature\",\"commit\":{\"sha\":\"789\"}}]";
-        sampleApiErrorJsonResponse = "{\"message\":\"Not Found\"}";
+        // when
+        List<GithubApiRepoDTO> result = githubApiClient.fetchAllUserReposInfoWithoutForks(username);
 
-        sampleGetAllRepoInfoDTOResponse = new GithubApiRepoDTO("usernameRepo1", new OwnerDTO("username"),
-                "https://test.test/repos/username/usernameRepo1/branches{/branch}",false);
-        sampleGetAllBranchesInfoDTOResponse = new OutputBranchDTO("main", "123");
-    }
-
-    @BeforeEach
-    void setUpProps() {
-        ReflectionTestUtils.setField(githubApiClient, "listRepositoriesForUserUrl", "https://test.test/users/username/repos");
+        // then
+        assertEquals(1, result.size());
+        assertEquals(mockRepos[0], result.getFirst());
     }
 
     @Test
-    void shouldReturnCorrectCollectionOfReposWhenFetchAllUserReposInfoWithoutForks() throws Exception {
-        // Should
-        HttpRequest getAllReposHttpRequest = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create("https://test.test/users/username/repos"))
-                .build();
-        when(httpClient.send(getAllReposHttpRequest, HttpResponse.BodyHandlers.ofString())).thenReturn(httpResponse);
-        when(httpResponse.statusCode()).thenReturn(200);
-        when(httpResponse.body()).thenReturn(sampleGetAllRepoInfoJsonResponse);
-        // When
-        List<GithubApiRepoDTO> githubApiRepoDTOList = githubApiClient.fetchAllUserReposInfoWithoutForks("username");
-        // Then
-        assertEquals(2, githubApiRepoDTOList.size());
-        assertEquals(sampleGetAllRepoInfoDTOResponse, githubApiRepoDTOList.getFirst());
+    public void shouldFetchAllRepoBranchesMappedToOutputBranchDTOsWhenApiReturnsSuccess() throws GithubApiException, JsonProcessingException {
+        // given
+        GithubApiRepoDTO repoDTO = new GithubApiRepoDTO("repo", null, baseGithubApiUrl + "{/branch}", true);
+        CommitDTO commitDTO = new CommitDTO("sha");
+        BranchDTO[] mockBranches = {
+                new BranchDTO("commit1", commitDTO),
+                new BranchDTO("commit2", commitDTO)
+        };
+        mockServer.expect(requestTo(baseGithubApiUrl))
+                .andRespond(withSuccess(objectMapper.writeValueAsBytes(mockBranches), MediaType.APPLICATION_JSON));
+
+        // when
+        List<OutputBranchDTO> result = githubApiClient.fetchAllRepoBranchesMappedToOutputBranchDTOs(repoDTO);
+
+        // then
+        assertEquals(mockBranches.length, result.size());
+        assertEquals(mockBranches[0].name(), result.getFirst().name());
+        assertEquals(mockBranches[1].commitDTO().sha(), result.getLast().lastCommitSha());
     }
 
     @Test
-    void shouldThrowExceptionWhenUserDoesNotExist() throws Exception {
-        // Should
-        when(httpClient.send(any(), eq(HttpResponse.BodyHandlers.ofString()))).thenReturn(httpResponse);
-        when(httpResponse.statusCode()).thenReturn(404);
-        when(httpResponse.body()).thenReturn(sampleApiErrorJsonResponse);
-        // When
-        GithubApiException exception = assertThrows(GithubApiException.class, () ->
-                githubApiClient.fetchAllUserReposInfoWithoutForks("")
-        );
-        // Then
-        assertEquals(404, exception.getStatus());
-        assertEquals("Not Found", exception.getMessage());
-    }
+    public void shouldThrowExceptionWhenApiReturnsUserNotFound() throws GithubApiException, JsonProcessingException {
+        // given
+        String username = "username";
+        String expectedUrl = baseGithubApiUrl + listRepositoriesForUserRoute.formatted(username);
+        GithubApiException e = new GithubApiException(404, "User not found");
+        mockServer.expect(requestTo(expectedUrl))
+                .andRespond(withStatus(HttpStatus.NOT_FOUND)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(objectMapper.writeValueAsBytes(e)));
 
-    @Test
-    void shouldReturnCorrectCollectionOfBranchesWhenFetchAllRepoBranchesMappedToOutputBranchDTOs() throws Exception {
-        // Should
-        HttpRequest getAllReposHttpRequest = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create("https://test.test/repos/username/usernameRepo1/branches"))
-                .build();
-        when(httpClient.send(getAllReposHttpRequest, HttpResponse.BodyHandlers.ofString())).thenReturn(httpResponse);
-        when(httpResponse.statusCode()).thenReturn(200);
-        when(httpResponse.body()).thenReturn(sampleGetAllBranchesInfoJsonResponse);
-        // When
-        List<OutputBranchDTO> outputBranchDTOS = githubApiClient.fetchAllRepoBranchesMappedToOutputBranchDTOs(sampleGetAllRepoInfoDTOResponse);
-        // Then
-        assertEquals(3, outputBranchDTOS.size());
-        assertEquals(sampleGetAllBranchesInfoDTOResponse, outputBranchDTOS.getFirst());
+        // when
+        GithubApiException result = assertThrows(GithubApiException.class,
+                () -> githubApiClient.fetchAllUserReposInfoWithoutForks(username));
+
+        // then
+        assertEquals(e.getStatus(), result.getStatus());
+        assertEquals(e.getMessage(), result.getMessage());
     }
 }

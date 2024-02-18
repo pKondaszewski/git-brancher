@@ -7,9 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.przemek.gitbrancher.dto.GithubApiRepoDTO;
-import pl.przemek.gitbrancher.dto.OutputBranchDTO;
-import pl.przemek.gitbrancher.dto.OutputRepoDTO;
 import pl.przemek.gitbrancher.dto.OwnerDTO;
+import pl.przemek.gitbrancher.dto.out.OutputBranchDTO;
+import pl.przemek.gitbrancher.dto.out.OutputRepoDTO;
 import pl.przemek.gitbrancher.exception.GithubApiException;
 import pl.przemek.gitbrancher.service.github.api.GithubApiClient;
 
@@ -43,13 +43,15 @@ public class GithubWrapperServiceTest {
     }
 
     @Test
-    void shouldReturnCorrectCollectionOfReposWhenFetchAllUserReposInfoWithoutForks() throws Exception {
-        // Should
+    void shouldReturnCorrectCollectionOfReposWhenFetchAllUserReposInfoWithoutForks() {
+        // given
         when(githubApiClient.fetchAllUserReposInfoWithoutForks(username)).thenReturn(githubApiRepoDTOList);
         when(githubApiClient.fetchAllRepoBranchesMappedToOutputBranchDTOs(repoDTO1)).thenReturn(outputBranchDTOList);
-        // When
+
+        // when
         List<OutputRepoDTO> result = githubWrapperService.getAllUserReposWithoutForks(username);
-        // Then
+
+        // then
         assertEquals(githubApiRepoDTOList.size(), result.size());
         assertEquals(repoDTO1.name(), result.getFirst().repositoryName());
         assertEquals(repoDTO1.ownerDTO().login(), result.getFirst().ownerLogin());
@@ -58,15 +60,17 @@ public class GithubWrapperServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenGithubApiThrowsException() throws Exception {
-        // Should
+    void shouldThrowExceptionWhenGithubApiThrowsException() {
+        // given
         GithubApiException userNotFoundException = new GithubApiException(404, "Not found");
         when(githubApiClient.fetchAllUserReposInfoWithoutForks(username)).thenThrow(userNotFoundException);
-        // When
+
+        // when
         GithubApiException exception = assertThrows(GithubApiException.class, () ->
                 githubWrapperService.getAllUserReposWithoutForks(username)
         );
-        // Then
+
+        // then
         assertEquals(userNotFoundException, exception);
     }
 }
