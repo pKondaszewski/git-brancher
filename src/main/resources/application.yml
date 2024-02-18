@@ -1,4 +1,11 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+
 github:
   api:
     path:
-      get-all-user-repos: https://api.github.com/users/%s/repos
+      base: https://api.github.com
+      routes:
+        get-all-user-repos: /users/%s/repos

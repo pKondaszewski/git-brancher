@@ -21,14 +21,15 @@ dependencies {
 	// openapi
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 	// utils
-	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
 	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
+	implementation 'org.springframework:spring-webflux:6.1.4'
+	testImplementation 'org.wiremock:wiremock-standalone:3.3.1'
+	testCompileOnly 'org.projectlombok:lombok:1.18.30'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
 
 tasks.named('test') {

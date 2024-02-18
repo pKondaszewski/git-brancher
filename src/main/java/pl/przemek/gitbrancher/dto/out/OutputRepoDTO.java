@@ -1,4 +1,4 @@
-package pl.przemek.gitbrancher.dto;
+package pl.przemek.gitbrancher.dto.out;
 
 import java.util.List;
 
