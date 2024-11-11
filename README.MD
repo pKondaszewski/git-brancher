@@ -1,5 +1,5 @@
 # Git Brancher
-Recruitment task for Atipera.
+Recruitment task.
 
 ## Used technologies ⚙️🛠️
 - Java 21
