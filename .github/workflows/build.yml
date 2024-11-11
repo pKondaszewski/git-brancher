@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - main
+      - **
 
 jobs:
   build:
@@ -24,3 +24,7 @@ jobs:
 
       - name: Build
         run: ./gradlew build
+
+      - name: Run after successful merge
+        if: github.event.pull_request.merged == true
+        run: echo "This step runs only after a successful merge"
