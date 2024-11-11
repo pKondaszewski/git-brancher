@@ -4,11 +4,20 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
+    types:
+      - closed
 
 jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo The PR was merged
+
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,7 +33,3 @@ jobs:
 
       - name: Build
         run: ./gradlew build
-
-      - name: Run after successful merge
-        if: github.event.pull_request.merged == true
-        run: echo "This step runs only after a successful merge"
