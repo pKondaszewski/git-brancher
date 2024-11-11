@@ -6,6 +6,16 @@ on:
       - '**'
 
 jobs:
+  master_job:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Echo 123
+        run: echo "123"
+
   build:
     runs-on: ubuntu-latest
     needs: master_job
