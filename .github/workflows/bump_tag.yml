@@ -10,6 +10,9 @@ jobs:
     permissions:
       contents: write
 
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     steps:
     - run: |
         echo The PR was MERGED
