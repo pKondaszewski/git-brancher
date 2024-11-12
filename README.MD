@@ -1,6 +1,6 @@
 # Git Brancher
 Recruitment task.
-
+.
 ## Used technologies ⚙️🛠️
 - Java 21
 - Spring Boot 3
