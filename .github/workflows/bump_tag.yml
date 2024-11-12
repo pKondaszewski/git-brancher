@@ -26,7 +26,7 @@ jobs:
 
     - name: Update image tag in deployment.yaml and commit changes
       run: |
-        NEW_TAG="${{ steps.tag_version.outputs.new_tag }}"
+        NEW_TAG=${{ steps.tag_version.outputs.new_tag }}
         FILE_PATH="k8s/base/dapr/deployment.yml"
         echo "image:my-app-image:$NEW_TAG" > $FILE_PATH
         
