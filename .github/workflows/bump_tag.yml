@@ -10,3 +10,11 @@ jobs:
     steps:
     - run: |
         echo The PR was merged
+
+    - name: Create new tag
+      run: |
+        NEW_TAG="v$(date +%Y%m%d%H%M%S)"
+        git tag $NEW_TAG
+        git push --tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
