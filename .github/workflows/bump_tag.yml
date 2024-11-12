@@ -1,3 +1,5 @@
+name: Bump tag
+
 on:
   pull_request:
     types:
@@ -26,8 +28,7 @@ jobs:
       run: |
         NEW_TAG="${{ steps.tag_version.outputs.new_tag }}"
         FILE_PATH="k8s/base/dapr/deployment.yml"
-        CURRENT_DATE=$(date +'%Y-%m-%d')
-        echo "image:my-app-image" > $FILE_PATH
+        echo "image:my-app-imagee" > $FILE_PATH
         
     - name: Auto commit changes
       uses: stefanzweifel/git-auto-commit-action@v5
