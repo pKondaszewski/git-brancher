@@ -3,7 +3,7 @@ name: Main Pipeline
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-test:
