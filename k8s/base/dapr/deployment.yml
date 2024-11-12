@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: my-web-app-container
-          image: my-web-app-image:1.2.3
+          image: my-web-app-image:0.1.24
           ports:
             - containerPort: 80
           env:
