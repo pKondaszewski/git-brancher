@@ -23,7 +23,7 @@ jobs:
       run: |
         NEW_TAG="${{ steps.tag_version.outputs.new_tag }}"
         
-        FILE_PATH="k8s/base/dapr/deployment.yml"
+        FILE_PATH="${GITHUB_WORKSPACE}/k8s/base/dapr/deployment.yml"
         
         sed -i "s|image:my-app-image:[0-9]\+\.[0-9]\+\.[0-9]\+|image:my-app-image:$NEW_TAG|" $FILE_PATH
         
