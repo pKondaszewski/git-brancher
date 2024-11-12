@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - run: |
-        echo The PR was merged
+        echo The PR was MERGED
 
     - name: Bump version and push tag
       id: tag_version
