@@ -2,12 +2,11 @@ on:
   push:
     branches:
       - main
-    commit:
-      message: "Update image tag"
 
 jobs:
   if_tag_update:
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'Update image tag')
     permissions:
       contents: write
 
