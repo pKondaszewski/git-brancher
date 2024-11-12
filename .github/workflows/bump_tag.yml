@@ -11,10 +11,8 @@ jobs:
     - run: |
         echo The PR was merged
 
-    - name: Create new tag
-      run: |
-        NEW_TAG="v$(date +%Y%m%d%H%M%S)"
-        git tag $NEW_TAG
-        git push --tags
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+    - name: Bump version and push tag
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
