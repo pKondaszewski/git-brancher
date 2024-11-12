@@ -23,6 +23,7 @@ jobs:
       uses: mathieudutour/github-tag-action@v6.2
       id: tag_version
       with:
+        tag_prefix: " "
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Update image tag in deployment.yaml and commit changes
