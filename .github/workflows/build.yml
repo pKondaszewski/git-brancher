@@ -1,35 +1,24 @@
-name: Build
+name: Dependent Pipeline
 
 on:
   push:
+    branches-ignore:
+      - master
+
+  workflow_run:
+    workflows: ["Main Pipeline"]
     branches:
-      - '**'
+      - master
+    types:
+      - completed
 
 jobs:
-  master_job:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Echo 123
-        run: echo "123"
-
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '21'
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Build
+      - name: Build project
         run: ./gradlew build
