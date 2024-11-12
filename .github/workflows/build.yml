@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - main
+      paths:
+      - '**deployment.yml'
   workflow_run:
     workflows: ["Bump tag"]
     types:
