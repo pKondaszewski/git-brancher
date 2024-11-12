@@ -17,4 +17,4 @@ jobs:
         git tag $NEW_TAG
         git push --tags
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
