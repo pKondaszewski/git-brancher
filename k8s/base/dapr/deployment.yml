@@ -1,1 +1,41 @@
-image:my-app-image:0.1.22
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-web-app-deployment
+  namespace: default
+  labels:
+    app: my-web-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-web-app
+  template:
+    metadata:
+      labels:
+        app: my-web-app
+    spec:
+      containers:
+        - name: my-web-app-container
+          image: my-web-app-image:1.2.3
+          ports:
+            - containerPort: 80
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/my-web-app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: my-web-app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-web-app-service
+spec:
+  selector:
+    app: my-web-app
+  ports:
