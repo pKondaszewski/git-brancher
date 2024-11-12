@@ -23,7 +23,7 @@ jobs:
       run: |
         NEW_TAG="${{ steps.tag_version.outputs.new_tag }}"
         
-        FILE_PATH="k8s/base/dapr/deployment.yaml"
+        FILE_PATH="k8s/base/dapr/deployment.yml"
         
         sed -i "s|image:my-app-image:[0-9]\+\.[0-9]\+\.[0-9]\+|image:my-app-image:$NEW_TAG|" $FILE_PATH
         
@@ -31,5 +31,5 @@ jobs:
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: "Update image tag to my-app-image:$NEW_TAG"
-        file_pattern: "k8s/base/dapr/deployment.yaml"
+        file_pattern: "k8s/base/dapr/deployment.yml"
         github_token: ${{ secrets.GITHUB_TOKEN }}
