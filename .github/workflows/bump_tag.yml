@@ -19,3 +19,7 @@ jobs:
       uses: mathieudutour/github-tag-action@v6.2
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Get and echo the new tag
+      run: |
+        echo "The new tag is: ${{ steps.tag_version.outputs.new_tag }}"
