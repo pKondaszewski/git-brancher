@@ -35,6 +35,6 @@ jobs:
     - name: Auto commit changes
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: "Update image tag to my-app-image:$NEW_TAG"
-        file_pattern: "k8s/base/dapr/deployment.yml"
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        commit_message: Update image tag to my-app-image:$NEW_TAG
+        # file_pattern: "k8s/base/dapr/deployment.yml"
+        # github_token: ${{ secrets.GITHUB_TOKEN }}
